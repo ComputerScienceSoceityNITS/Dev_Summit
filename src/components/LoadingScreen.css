@@ -1,0 +1,32 @@
+.loading-screen {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  background: #11100f;
+}
+
+.loading-screen__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loading-screen__progress {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  overflow: hidden;
+  background: rgb(245 244 241 / 24%);
+}
+
+.loading-screen__progress-fill {
+  display: block;
+  height: 100%;
+  background: #d6ff5f;
+  box-shadow: 0 0 14px rgb(214 255 95 / 70%);
+  transition: width 180ms linear;
+}
