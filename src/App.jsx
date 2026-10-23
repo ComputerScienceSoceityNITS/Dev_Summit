@@ -1,17 +1,20 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useState } from "react";
+import LoadingScreen from "./components/LoadingScreen/LoadingScreen.jsx";
+import HomePage from "./pages/HomePage.jsx";
+import "./styles/global.css";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isComplete, setIsComplete] = useState(false);
 
   return (
-    <>
-      DEV SUMMIT 2026
-    </>
-  )
+    <div className="site-shell">
+      {isComplete ? (
+        <HomePage />
+      ) : (
+        <LoadingScreen onComplete={() => setIsComplete(true)} />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
