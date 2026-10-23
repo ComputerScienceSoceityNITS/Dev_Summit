@@ -1,5 +1,6 @@
 .devfest-loader-container {
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
   font-family:
     "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", monospace;
@@ -89,14 +90,21 @@
   font-size: 0.85rem;
   color: rgba(245, 244, 241, 0.7);
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 8px 12px;
   letter-spacing: normal;
 }
 
 .status-message {
   display: flex;
+  min-width: 0;
+  flex: 1 1 180px;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  overflow-wrap: anywhere;
 }
 
 .blink-cursor {
