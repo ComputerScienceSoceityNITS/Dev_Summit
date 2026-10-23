@@ -13,7 +13,7 @@ const LoadingBar = ({ onComplete }) => {
     const messages = [
       {
         threshold: 0,
-        text: "Booting Dev Fest core protocols...",
+        text: "Booting Dev Summit core protocols...",
         icon: <Terminal size={14} />,
       },
       {
@@ -82,7 +82,7 @@ const LoadingBar = ({ onComplete }) => {
       <div className="terminal-header">
         <div className="terminal-title">
           <Terminal size={18} />
-          Dev_Fest_v2.0
+          Dev_Summit_v1.0
         </div>
         <div className="terminal-percentage">{progress}%</div>
       </div>

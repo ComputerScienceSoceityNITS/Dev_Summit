@@ -1,7 +1,7 @@
-import optimusPrime from "../assets/trans-1-cutout.png";
-import bumblebee from "../assets/trans-2-cutout.png";
-import summitLogo from "../assets/dev-summit-logo-cutout.png";
-import "../pages/HomePage.css";
+import optimusPrime from "../../assets/trans-1-cutout.png";
+import bumblebee from "../../assets/trans-2-cutout.png";
+import summitLogo from "../../assets/dev-summit-logo-cutout.png";
+import "./LoadingScreen.css";
 import LoadingBar from "./LoadingBar";
 
 function LoadingScreen({ onComplete }) {
