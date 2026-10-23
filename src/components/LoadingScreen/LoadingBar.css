@@ -87,7 +87,6 @@
 
 .terminal-footer {
   margin-top: 12px;
-  font-size: 0.85rem;
   color: rgba(245, 244, 241, 0.7);
   display: flex;
   flex-wrap: wrap;
@@ -95,6 +94,18 @@
   justify-content: space-between;
   gap: 8px 12px;
   letter-spacing: normal;
+}
+
+@media (max-width: 700px) {
+  .terminal-footer {
+    font-size: 0.7rem;
+  }
+}
+
+@media (min-width: 701px) {
+  .terminal-footer {
+    font-size: 0.85rem;
+  }
 }
 
 .status-message {
