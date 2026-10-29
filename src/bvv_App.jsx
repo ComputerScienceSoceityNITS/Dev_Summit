@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import Loader from "./Loader.jsx";
+import Loader from "./bvv_Loader.jsx";
 import "./styles.css";
 
 const days = [
