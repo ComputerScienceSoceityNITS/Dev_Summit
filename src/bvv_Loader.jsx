@@ -9,7 +9,7 @@ const steps = [
   [100, "System Ready. Access Granted."],
 ];
 
-export default function Loader({ onDone }) {
+export default function bvv_Loader({ onDone }) {
   const [p, setP] = useState(0);
   const [out, setOut] = useState(false);
   const finished = useRef(false);

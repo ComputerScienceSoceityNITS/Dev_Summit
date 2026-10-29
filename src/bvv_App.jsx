@@ -63,7 +63,7 @@ const outcomes = [
 ];
 
 const L = "/assets/logos/";
-function App() {
+function bvv_App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const done = useCallback(() => setLoading(false), []);
@@ -432,4 +432,4 @@ function App() {
     </main>
   );
 }
-export default App;
+export default bvv_App;
