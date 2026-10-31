@@ -1,17 +1,16 @@
-# React + Vite
+# Dev Summit 2026 — Phase 1
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite single-page website (red / blue / white system) for Dev Summit 2026, Computer Science Society, NIT Silchar.
 
-Currently, two official plugins are available:
+## Run locally
+1. Install Node.js (LTS)
+2. `npm install`
+3. `npm run dev` (development) or `npm run build && npm run preview` (production check)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## What's included
+- Animated terminal-style loading screen (progress, boot messages, skip button, reduced-motion aware): `src/Loader.jsx`
+- CSS logo in the hero and footer; NIT Silchar logo in the footer. Files live in `public/assets/logos/`
+- Landscape hero video (`public/assets/hero-bg.mp4`, rotated upright from the portrait source, ~6 MB) with a poster image; on phones it plays as a full-width 16:9 band above the headline
+- Mobile-first polish: safe-area insets, 44px touch targets, readable label sizes, stacked layouts under 760px
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-"# Dev_Summit" 
+Loader characters (`public/assets/loader/`) are transparent cut-outs of the supplied Optimus Prime and Bumblebee images.

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const steps = [
   [0, 'Booting Dev Summit core protocols...'],
-  [24, 'Loading CSS × IEEE modules...'],
+  [24, 'Loading CSS modules...'],
   [48, 'Compiling workshop modules...'],
   [72, 'Syncing Phase 01 timeline...'],
   [93, 'Finalising interface...'],
