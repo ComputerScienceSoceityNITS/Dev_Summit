@@ -1,5 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import Loader from './Loader.jsx'
+import Admin from './Admin.jsx'
+import { api, fmtRange, fmtLong } from './lib.js'
 import './styles.css'
 
 const days = [
@@ -40,35 +42,45 @@ function useTimelineProgress(ref, page) {
   }, [page])
 }
 
-const nav = [['overview','Overview'],['timeline','Timeline'],['wings','Wings'],['workshops','Workshops'],['outcomes','Outcomes']]
-const valid = ['home', ...nav.map(n => n[0]), 'register']
-const read = () => { const h = location.hash.replace(/^#\/?/, ''); return valid.includes(h) ? h : 'home' }
+const nav = [['overview','Overview'],['timeline','Timeline'],['wings','Wings'],['workshops','Workshops'],['outcomes','Outcomes'],['events','Events']]
+const valid = ['home', ...nav.map(n => n[0]), 'register', 'admin']
+const parse = () => { const [p, q] = location.hash.replace(/^#\/?/, '').split('/'); return { page: valid.includes(p) ? p : 'home', param: q || '' } }
 
-const API = '' // Paste your form endpoint here (Google Apps Script, Formspree, your backend). Empty = saved in this browser only.
 const experience = ['No experience', 'Web development', 'Machine learning (ML)', 'Both Web and ML']
-function Register() {
-  const [f, setF] = useState({ name:'', scholarId:'', phone:'', experience:'', details:'', department:'' })
+function Register({ eventId }) {
+  const [events, setEvents] = useState(null)
+  const [loadErr, setLoadErr] = useState(false)
+  const [f, setF] = useState({ eventId: eventId || '', name:'', scholarId:'', phone:'', experience:'', details:'', department:'' })
   const [st, setSt] = useState('idle')
+  const [err, setErr] = useState('')
+  useEffect(() => {
+    let live = true
+    api.events().then(d => {
+      if (!live) return
+      setEvents(d.events)
+      setF(p => p.eventId && d.events.some(e => e.id === p.eventId) ? p : { ...p, eventId: (d.events.find(e => e.open) || {}).id || '' })
+    }).catch(() => { if (live) setLoadErr(true) })
+    return () => { live = false }
+  }, [])
+  const ev = events && events.find(e => e.id === f.eventId)
   const set = k => e => setF({ ...f, [k]: e.target.value })
   const submit = async e => {
-    e.preventDefault(); setSt('sending')
-    const data = { ...f, details: f.experience === 'No experience' ? '' : f.details }
-    try {
-      if (API) {
-        const r = await fetch(API, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ ...data, event:'Dev Summit 2026', at:new Date().toISOString() }) })
-        if (!r.ok) throw new Error('bad response')
-      } else {
-        const k = 'ds26-registrations'
-        localStorage.setItem(k, JSON.stringify([...JSON.parse(localStorage.getItem(k) || '[]'), data]))
-      }
-      setSt('done')
-    } catch { setSt('error') }
+    e.preventDefault(); setSt('sending'); setErr('')
+    const { eventId: id, ...rest } = f
+    try { await api.register(id, { ...rest, details: f.experience === 'No experience' ? '' : f.details }); setSt('done') }
+    catch (x) { setErr(x.message); setSt('error') }
   }
+  const info = <div className="reg-info"><div className="section-label"><span>→</span> / REGISTRATION</div><h2>Reserve<br/><span>your seat.</span></h2>
+    {ev ? <><p>{ev.description || ev.title}</p><ul><li>{fmtRange(ev.startDate, ev.endDate)}</li>{ev.venue && <li>{ev.venue}</li>}<li>{ev.spotsLeft == null ? 'Open to all students' : ev.spotsLeft + ' seats left'}</li></ul></> :
+    <p>Register to take part in Dev Summit 2026. Open to students who want to learn, build and connect.</p>}</div>
+  if (loadErr || (events && events.length === 0)) return <section className="register section-pad full">{info}<div className="reg-card reg-done"><h3>{loadErr ? 'Can’t load events' : 'No events yet'}</h3><p>{loadErr ? 'We couldn’t reach the server. Please refresh the page or try again in a moment.' : 'Registration will open soon. Check back shortly.'}</p></div></section>
+  if (!events) return <section className="register section-pad full">{info}<div className="reg-card reg-done"><p>Loading…</p></div></section>
   return <section className="register section-pad full">
-    <div className="reg-info"><div className="section-label"><span>→</span> / REGISTRATION</div><h2>Reserve<br/><span>your seat.</span></h2><p>Register to take part in Dev Summit 2026 Phase 1, from 4 to 6 November. Open to students who want to learn, build and connect.</p><ul><li>3 days of hands-on sessions</li><li>Web, tools, data science and ML</li><li>No prior experience required</li></ul></div>
-    {st === 'done' ? <div className="reg-card reg-done"><h3>You’re registered.</h3><p>Thanks, {f.name.split(' ')[0] || 'there'}! Your registration for Dev Summit 2026 is confirmed for Scholar ID <strong>{f.scholarId}</strong>. See you on 4 November.</p><a className="reg-btn" href="#/timeline">View the schedule</a></div> :
+    {info}
+    {st === 'done' ? <div className="reg-card reg-done"><h3>You’re registered.</h3><p>Thanks, {f.name.split(' ')[0] || 'there'}! Your registration for {ev ? ev.title : 'the event'} is confirmed for Scholar ID <strong>{f.scholarId}</strong>. See you on {ev ? fmtLong(ev.startDate) : 'the day'}.</p><a className="reg-btn" href="#/timeline">View the schedule</a></div> :
     <form className="reg-card" onSubmit={submit}>
       <div className="reg-grid">
+        <label className="wide"><span>Event</span><select required value={f.eventId} onChange={set('eventId')}>{events.map(x => <option key={x.id} value={x.id} disabled={!x.open}>{x.title}{x.open ? '' : x.full ? ' (full)' : ' (registration closed)'}</option>)}</select></label>
         <label><span>Name</span><input required type="text" autoComplete="name" value={f.name} onChange={set('name')} /></label>
         <label><span>Scholar ID</span><input required type="text" value={f.scholarId} onChange={set('scholarId')} /></label>
         <label><span>Phone number</span><input required type="tel" inputMode="tel" autoComplete="tel" pattern="[0-9+\- ]{10,15}" title="Enter a valid phone number" value={f.phone} onChange={set('phone')} /></label>
@@ -76,20 +88,39 @@ function Register() {
         {f.experience && f.experience !== 'No experience' && <label className="wide"><span>Tell us about your {f.experience === 'Both Web and ML' ? 'Web and ML' : f.experience === 'Machine learning (ML)' ? 'ML' : 'Web'} experience</span><textarea rows="4" maxLength={500} value={f.details} onChange={set('details')} placeholder="Projects, courses, tools or languages you have worked with…" /></label>}
         <label className="wide"><span>Department</span><input required type="text" value={f.department} onChange={set('department')} /></label>
       </div>
-      {st === 'error' && <p className="reg-err">Something went wrong. Please try again.</p>}
-      <button className="reg-btn" type="submit" disabled={st === 'sending'}>{st === 'sending' ? 'Submitting…' : 'Register for Dev Summit'}</button>
+      {st === 'error' && <p className="reg-err">{err || 'Something went wrong. Please try again.'}</p>}
+      <button className="reg-btn" type="submit" disabled={st === 'sending' || !ev || !ev.open}>{st === 'sending' ? 'Submitting…' : 'Register for this event'}</button>
     </form>}
+  </section>
+}
+
+function EventsPage() {
+  const [events, setEvents] = useState(null)
+  const [failed, setFailed] = useState(false)
+  useEffect(() => { let live = true; api.events().then(d => live && setEvents(d.events)).catch(() => live && setFailed(true)); return () => { live = false } }, [])
+  return <section className="events-page section-pad full" id="events">
+    <div className="section-label"><span>06</span> / EVENTS</div>
+    <div className="section-head"><h2>Upcoming <span>events.</span></h2><p>Pick an event, register in under a minute and get ready to build.</p></div>
+    {failed ? <p className="ev-note">We couldn’t load events right now. Please refresh the page.</p> : !events ? <p className="ev-note">Loading events…</p> : events.length === 0 ? <p className="ev-note">No events have been announced yet. Check back soon.</p> :
+    <div className="ev-grid">{events.map(e => <article className="ev-card" key={e.id}>
+      <div className="ev-date">{fmtRange(e.startDate, e.endDate)}</div>
+      <h3>{e.title}</h3>
+      {e.description && <p>{e.description}</p>}
+      <div className="ev-meta">{e.venue && <span>{e.venue}</span>}<span>{e.spotsLeft == null ? 'Open to all' : e.full ? 'Event full' : e.spotsLeft + ' seats left'}</span></div>
+      {e.open ? <a className="reg-btn" href={'#/register/' + e.id}>Register ↗</a> : <span className="ev-closed">{e.full ? 'Event full' : 'Registration closed'}</span>}
+    </article>)}</div>}
   </section>
 }
 
 function App() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(read)
+  const [route, setRoute] = useState(parse)
+  const page = route.page
   const done = useCallback(() => setLoading(false), [])
   const listRef = useRef(null)
   useTimelineProgress(listRef, page)
-  useEffect(() => { const f = () => { setPage(read()); window.scrollTo(0, 0) }; window.addEventListener('hashchange', f); return () => window.removeEventListener('hashchange', f) }, [])
+  useEffect(() => { const f = () => { setRoute(parse()); window.scrollTo(0, 0) }; window.addEventListener('hashchange', f); return () => window.removeEventListener('hashchange', f) }, [])
   return <main>
     {loading && <Loader onDone={done} />}
     <header className="nav">
@@ -134,8 +165,10 @@ function App() {
       <div className="outcomes-title"><div className="section-label"><span>05</span> / TAKE IT WITH YOU</div><h2>Leave with<br/><span>momentum.</span></h2><p>By the end of Phase 1, you’ll have a clearer path into the tech ecosystem and a toolkit to keep learning.</p></div>
       <div className="outcomes-list">{outcomes.map((o,i)=><div className="outcome-row" key={o}><span>{String(i+1).padStart(2,'0')}</span><p>{o}</p><b>↗</b></div>)}</div>
     </section>}
-    {page === 'register' && <Register />}
-    <footer className="footer"><div className="footer-top"><div className="footer-brand"><div className="brand-mark">D<span>/</span>S</div><div><strong>DEV SUMMIT 2026</strong><p>PHASE 01 · 04—06 NOVEMBER</p></div></div><a href="#/home" className="back-top">BACK TO TOP ↑</a></div><div className="footer-logos"><img src={L+'css.png'} alt="Computer Science Society" /></div><div className="footer-bottom"><span>ORGANISED BY COMPUTER SCIENCE SOCIETY, NIT SILCHAR</span><span>BUILD / CONNECT / INSPIRE</span><span>© 2026 DEV SUMMIT</span></div></footer>
+    {page === 'events' && <EventsPage />}
+    {page === 'register' && <Register key={route.param} eventId={route.param} />}
+    {page === 'admin' && <Admin />}
+    <footer className="footer"><div className="footer-top"><div className="footer-brand"><div className="brand-mark">D<span>/</span>S</div><div><strong>DEV SUMMIT 2026</strong><p>PHASE 01 · 04—06 NOVEMBER</p></div></div><a href="#/home" className="back-top">BACK TO TOP ↑</a></div><div className="footer-logos"><img src={L+'css.png'} alt="Computer Science Society" /></div><div className="footer-bottom"><span>ORGANISED BY COMPUTER SCIENCE SOCIETY, NIT SILCHAR</span><span>BUILD / CONNECT / INSPIRE</span><span>© 2026 DEV SUMMIT</span><a href="#/admin" className="footer-admin">ADMIN</a></div></footer>
   </main>
 }
 export default App

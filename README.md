@@ -14,3 +14,23 @@ React + Vite single-page website (red / blue / white system) for Dev Summit 2026
 - Mobile-first polish: safe-area insets, 44px touch targets, readable label sizes, stacked layouts under 760px
 
 Loader characters (`public/assets/loader/`) are transparent cut-outs of the supplied Optimus Prime and Bumblebee images.
+
+## Admin features
+Organisers get a protected dashboard at `#/admin` (linked as "ADMIN" in the footer). Sign in with the admin **username and password**.
+
+- **Add event** — title, description, dates, venue, optional seat limit, open/closed status
+- **Edit event** — update any detail, close registration, or change the seat limit
+- **Delete event** — inside the Edit window; asks for confirmation and also removes that event's registrations
+- **Registrations** — per-event count, seats left, experience breakdown, search/filter, each person's full response, and **Export CSV**
+
+### Running it
+1. Copy `.env.example` to `.env` and set `ADMIN_USERNAME` and `ADMIN_PASSWORD` (works the same on Windows, Mac and Linux).
+2. `npm install`
+3. Terminal 1: `npm run server`   Terminal 2: `npm run dev`
+
+Production (one process): set `NODE_ENV=production` plus both credentials, then `npm start` (serves the site and API on port 8787; change with `PORT`).
+
+Notes
+- Without a `.env`, development falls back to username `admin` / password `devsummit-admin`. In production the server refuses to start unless both are set.
+- Data lives in `server/data/db.json` (override with `DATA_DIR`). Back it up — deleting an event is permanent.
+- Needs a host that can run Node; static-only hosting cannot run the backend.
