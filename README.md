@@ -5,7 +5,10 @@ React + Vite single-page website (red / blue / white system) for Dev Summit 2026
 ## Run locally
 1. Install Node.js (LTS)
 2. `npm install`
-3. `npm run dev` (development) or `npm run build && npm run preview` (production check)
+3. Copy `.env.example` to `.env` and set `VITE_GOOGLE_CLIENT_ID` to your Google OAuth Web client ID.
+4. `npm run dev` (development) or `npm run build && npm run preview` (production check)
+
+Google sign-in also requires the same `GOOGLE_CLIENT_ID` in the backend environment. Configure the OAuth Web client with the frontend origin under authorized JavaScript origins. Sign-in is restricted to verified NIT Silchar Google accounts.
 
 ## What's included
 - Animated terminal-style loading screen (progress, boot messages, skip button, reduced-motion aware): `src/Loader.jsx`

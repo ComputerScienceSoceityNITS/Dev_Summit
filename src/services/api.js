@@ -63,6 +63,11 @@ export const api = {
   events: () => request("/events"),
   signup: (body) => request("/auth/signup", { method: "POST", body }),
   login: (body) => request("/auth/login", { method: "POST", body }),
+  googleSignIn: (credential) =>
+    request("/auth/google", {
+      method: "POST",
+      body: { credential },
+    }),
   me: () => request("/auth/me"),
   logout: () => request("/auth/logout", { method: "POST" }),
   registerForEvent: (eventId) =>
@@ -70,9 +75,9 @@ export const api = {
       method: "POST",
       body: { eventId },
     }),
+  myRegistrations: () => request("/registrations/mine"),
   createEvent: (body) => request("/events", { method: "POST", body }),
-  deleteEvent: (eventId) =>
-    request(`/events/${eventId}`, { method: "DELETE" }),
+  deleteEvent: (eventId) => request(`/events/${eventId}`, { method: "DELETE" }),
   registrations: (eventId) =>
     request(`/admin/registrations?eventId=${encodeURIComponent(eventId)}`),
   exportRegistrations: (eventId) =>

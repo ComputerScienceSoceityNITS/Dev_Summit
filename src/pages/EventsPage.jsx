@@ -30,6 +30,34 @@ export default function EventsPage() {
   }, [loadEvents]);
 
   useEffect(() => {
+    let active = true;
+
+    if (!user) {
+      setRegisteredIds(new Set());
+      return () => {
+        active = false;
+      };
+    }
+
+    api
+      .myRegistrations()
+      .then(({ registrations }) => {
+        if (active) {
+          setRegisteredIds(
+            new Set(registrations.map((registration) => registration.event.id)),
+          );
+        }
+      })
+      .catch((requestError) => {
+        if (active) setActionError(requestError.message);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  useEffect(() => {
     if (user?.role !== "admin") setManaging(false);
   }, [user]);
 

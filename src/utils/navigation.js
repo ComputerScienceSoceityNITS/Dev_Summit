@@ -16,6 +16,10 @@ export function parseRoute(hash = window.location.hash) {
     return { page: "register", section: "", param: param || "" };
   }
 
+  if (path === "profile") {
+    return { page: "profile", section: "", param: "" };
+  }
+
   if (path === "admin") {
     return { page: "home", section: "events", param: "" };
   }
