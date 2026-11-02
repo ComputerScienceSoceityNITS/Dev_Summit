@@ -96,7 +96,11 @@ export default function RegisterPage({ eventId }) {
         );
       }
     } catch (requestError) {
-      setError(requestError.errors[0].message);
+      setError(
+        requestError.message ||
+          requestError.errors?.[0]?.message ||
+          "Unable to complete your request. Please try again.",
+      );
     } finally {
       setBusy(false);
     }
@@ -263,13 +267,11 @@ export default function RegisterPage({ eventId }) {
             </>
           )}
           <label className="wide">
-            <span>College email</span>
+            <span>Email address</span>
             <input
               required
               type="email"
               autoComplete="email"
-              pattern="[A-Za-z0-9._%+-]+@cse\.nits\.ac\.in"
-              title="Use your @cse.nits.ac.in email address"
               value={form.email}
               onChange={updateField("email")}
             />

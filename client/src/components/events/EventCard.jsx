@@ -31,7 +31,7 @@ export default function EventCard({
   const statusLabel = event.registrationStatus || "status unavailable";
 
   return (
-    <article className="ev-card" key={eventId}>
+    <article className="ev-card">
       <div className="ev-date">
         {formatEventDate(event.date) || "DATE TO BE ANNOUNCED"}
       </div>

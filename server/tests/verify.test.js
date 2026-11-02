@@ -122,6 +122,17 @@ test("Dev Summit Backend Verification Suite", async (t) => {
     assert.deepStrictEqual(User.schema.path("role").enumValues, ["admin", "user"]);
   });
 
+  await t.test("User model accepts valid email addresses from other domains", async () => {
+    const user = new User({
+      name: "Test Student",
+      email: "student@example.com",
+      password: "password123",
+      scholarId: "22CS001",
+    });
+
+    await assert.doesNotReject(user.validate());
+  });
+
   await t.test("Registration creates a participant record for the authenticated user", async () => {
     const originalEventFindById = Event.findById;
     const originalFindOne = Participant.findOne;

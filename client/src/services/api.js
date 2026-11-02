@@ -38,8 +38,12 @@ async function request(path, { method = "GET", body, responseType } = {}) {
   }
 
   if (!response.ok) {
+    const validationMessage = Array.isArray(payload?.errors)
+      ? payload.errors.find((error) => error?.message)?.message
+      : undefined;
     throw new ApiError(
-      (payload && payload.message) ||
+      validationMessage ||
+        (payload && payload.message) ||
         "Something went wrong. Please try again.",
       response.status,
     );

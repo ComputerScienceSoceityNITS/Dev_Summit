@@ -16,10 +16,9 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      // Updated regex to only accept the specific domain
       match: [
-        /^[a-zA-Z0-9._%+-]+@cse\.nits\.ac\.in$/,
-        "Use a valid college email Id",
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        "Please provide a valid email address.",
       ],
     },
     password: {

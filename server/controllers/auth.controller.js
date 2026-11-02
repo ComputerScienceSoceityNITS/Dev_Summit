@@ -19,6 +19,8 @@ const generateToken = (id, role) => {
 const signup = asyncHandler(async (req, res) => {
   const { name, email, password, scholarId } = req.body;
 
+  console.log(name);
+
   if (
     typeof name !== "string" ||
     typeof email !== "string" ||
@@ -36,9 +38,15 @@ const signup = asyncHandler(async (req, res) => {
     );
   }
 
-  const existingUser = await User.findOne({ email: email.trim().toLowerCase() });
+  const existingUser = await User.findOne({
+    email: email.trim().toLowerCase(),
+  });
   if (existingUser) {
-    return errorResponse(res, 409, "An account with this email already exists.");
+    return errorResponse(
+      res,
+      409,
+      "An account with this email already exists.",
+    );
   }
 
   const user = await User.create({
