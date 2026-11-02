@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { api, fmtRange } from "../lib.js";
+import { api } from "../services/api.js";
+import { fmtRange } from "../utils/formatters.js";
 
 export default function EventsPage() {
   const [events, setEvents] = useState(null);
@@ -68,4 +69,3 @@ export default function EventsPage() {
     </section>
   );
 }
-

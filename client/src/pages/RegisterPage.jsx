@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { api, fmtLong, fmtRange } from "../lib.js";
+import { api } from "../services/api.js";
+import { fmtLong, fmtRange } from "../utils/formatters.js";
 
 const experience = [
   "No experience",
@@ -239,4 +240,3 @@ export default function RegisterPage({ eventId }) {
     </section>
   );
 }
-
