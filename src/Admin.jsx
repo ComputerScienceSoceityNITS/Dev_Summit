@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { api } from '../services/api.js'
-import { fmtRange, fmtStamp } from '../utils/formatters.js'
-import '../admin.css'
+import { api, fmtRange, fmtStamp } from './lib.js'
+import './admin.css'
 
 const TOKEN_KEY = 'ds26-admin-token'
 
@@ -288,7 +287,7 @@ function Dashboard({ token, onLogout }) {
 }
 
 /* ---------- entry ---------- */
-export default function AdminPage() {
+export default function Admin() {
   const [token, setToken] = useState(() => sessionStorage.getItem(TOKEN_KEY) || '')
   const logout = useCallback(() => { sessionStorage.removeItem(TOKEN_KEY); setToken('') }, [])
   if (!token) return <Login onLogin={t => { sessionStorage.setItem(TOKEN_KEY, t); setToken(t) }} />

@@ -1,21 +1,19 @@
-// Small API client shared by the public site and the admin dashboard.
 export class ApiError extends Error {
   constructor(message, status) {
     super(message);
+    this.name = "ApiError";
     this.status = status;
   }
 }
 
-async function call(path, { method = "GET", body, token, blob } = {}) {
+async function request(path, { method = "GET", body, responseType } = {}) {
   let response;
 
   try {
-    response = await fetch("/api" + path, {
+    response = await fetch(`/api${path}`, {
       method,
-      headers: {
-        ...(body ? { "Content-Type": "application/json" } : {}),
-        ...(token ? { Authorization: "Bearer " + token } : {}),
-      },
+      credentials: "include",
+      headers: body ? { "Content-Type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {
@@ -25,37 +23,57 @@ async function call(path, { method = "GET", body, token, blob } = {}) {
     );
   }
 
-  if (blob && response.ok) return response.blob();
+  if (responseType === "blob" && response.ok) {
+    return response.blob();
+  }
 
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
+  let payload;
+  try {
+    payload = await response.json();
+  } catch {
     throw new ApiError(
-      data.error || "Something went wrong. Please try again.",
+      "The server returned an invalid response.",
       response.status,
     );
   }
 
-  return data;
+  if (!response.ok) {
+    throw new ApiError(
+      (payload && payload.message) ||
+        "Something went wrong. Please try again.",
+      response.status,
+    );
+  }
+
+  if (!payload || !Object.prototype.hasOwnProperty.call(payload, "data")) {
+    throw new ApiError(
+      "The server returned an invalid response.",
+      response.status,
+    );
+  }
+
+  return payload.data;
 }
 
 export const api = {
-  events: () => call("/events"),
-  register: (id, body) =>
-    call(`/events/${id}/register`, { method: "POST", body }),
-  login: (username, password) =>
-    call("/admin/login", {
+  events: () => request("/events"),
+  signup: (body) => request("/auth/signup", { method: "POST", body }),
+  login: (body) => request("/auth/login", { method: "POST", body }),
+  me: () => request("/auth/me"),
+  logout: () => request("/auth/logout", { method: "POST" }),
+  registerForEvent: (eventId) =>
+    request("/registrations/register", {
       method: "POST",
-      body: { username, password },
+      body: { eventId },
     }),
-  adminEvents: (token) => call("/admin/events", { token }),
-  createEvent: (token, body) =>
-    call("/admin/events", { method: "POST", body, token }),
-  updateEvent: (token, id, body) =>
-    call(`/admin/events/${id}`, { method: "PUT", body, token }),
-  deleteEvent: (token, id) =>
-    call(`/admin/events/${id}`, { method: "DELETE", token }),
-  registrations: (token, id) =>
-    call(`/admin/events/${id}/registrations`, { token }),
-  registrationsCsv: (token, id) =>
-    call(`/admin/events/${id}/registrations.csv`, { token, blob: true }),
+  createEvent: (body) => request("/events", { method: "POST", body }),
+  deleteEvent: (eventId) =>
+    request(`/events/${eventId}`, { method: "DELETE" }),
+  registrations: (eventId) =>
+    request(`/admin/registrations?eventId=${encodeURIComponent(eventId)}`),
+  exportRegistrations: (eventId) =>
+    request(
+      `/admin/registrations/export?eventId=${encodeURIComponent(eventId)}`,
+      { responseType: "blob" },
+    ),
 };

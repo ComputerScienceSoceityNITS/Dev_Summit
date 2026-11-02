@@ -3,9 +3,11 @@ import { NAV_ITEMS } from "../../utils/navigation.js";
 export default function SiteHeader({
   active,
   isLandingPage,
+  user,
   menuOpen,
   onMenuToggle,
   onNavigate,
+  onSignOut,
 }) {
   return (
     <header className="nav">
@@ -38,9 +40,27 @@ export default function SiteHeader({
             {title}
           </a>
         ))}
-        <a className="nav-cta" href="#/register" onClick={onNavigate}>
-          Register ↗
-        </a>
+        {!user ? (
+          <a className="nav-cta" href="#/register" onClick={onNavigate}>
+            Register ↗
+          </a>
+        ) : (
+          <>
+            <a className="nav-cta" href="#/events" onClick={onNavigate}>
+              {user.name}
+            </a>
+            <button
+              className="nav-account"
+              onClick={() => {
+                onNavigate();
+                onSignOut();
+              }}
+              type="button"
+            >
+              Sign out
+            </button>
+          </>
+        )}
       </nav>
     </header>
   );

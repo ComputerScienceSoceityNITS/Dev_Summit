@@ -1,4 +1,5 @@
 const Event = require("../models/event.model");
+const Participant = require("../models/participant.model");
 const asyncHandler = require("../utils/asyncHandler");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 
@@ -49,10 +50,13 @@ const createEvent = asyncHandler(async (req, res) => {
  * @access  Private / Admin
  */
 const deleteEvent = asyncHandler(async (req, res) => {
-  const event = await Event.findByIdAndDelete(req.params.id);
+  const event = await Event.findById(req.params.id);
   if (!event) {
     return errorResponse(res, 404, "Event not found");
   }
+
+  await Participant.deleteMany({ event: event._id });
+  await event.deleteOne();
 
   return successResponse(res, 200, "Event deleted successfully");
 });

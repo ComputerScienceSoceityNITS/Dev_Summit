@@ -12,8 +12,12 @@ const sections = NAV_ITEMS.map(([section]) => section);
 export function parseRoute(hash = window.location.hash) {
   const [path, param] = hash.replace(/^#\/?/, "").split("/");
 
-  if (path === "register" || path === "admin") {
-    return { page: path, section: "", param: param || "" };
+  if (path === "register") {
+    return { page: "register", section: "", param: param || "" };
+  }
+
+  if (path === "admin") {
+    return { page: "home", section: "events", param: "" };
   }
 
   return {

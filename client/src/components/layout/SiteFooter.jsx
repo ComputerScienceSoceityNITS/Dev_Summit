@@ -18,18 +18,12 @@ export default function SiteFooter() {
         </a>
       </div>
       <div className="footer-logos">
-        <img
-          src={LOGO_DIRECTORY + "css.png"}
-          alt="Computer Science Society"
-        />
+        <img src={LOGO_DIRECTORY + "css.png"} alt="Computer Science Society" />
       </div>
       <div className="footer-bottom">
         <span>ORGANISED BY COMPUTER SCIENCE SOCIETY, NIT SILCHAR</span>
         <span>BUILD / CONNECT / INSPIRE</span>
         <span>© 2026 DEV SUMMIT</span>
-        <a href="#/admin" className="footer-admin">
-          ADMIN
-        </a>
       </div>
     </footer>
   );

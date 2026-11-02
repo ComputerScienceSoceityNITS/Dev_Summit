@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "server": "node server/index.js",
-    "start": "vite build && node server/index.js"
+    "server": "node ../server/server.js",
+    "start": "vite && node ../server/server.js"
   },
   "dependencies": {
     "react": "^18.3.1",

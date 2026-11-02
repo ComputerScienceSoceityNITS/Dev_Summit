@@ -1,242 +1,323 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "../context/AuthContext.jsx";
 import { api } from "../services/api.js";
-import { fmtLong, fmtRange } from "../utils/formatters.js";
 
-const experience = [
-  "No experience",
-  "Web development",
-  "Machine learning (ML)",
-  "Both Web and ML",
-];
+const initialForm = {
+  name: "",
+  email: "",
+  password: "",
+  scholarId: "",
+};
+
 export default function RegisterPage({ eventId }) {
-  const [events, setEvents] = useState(null);
-  const [loadErr, setLoadErr] = useState(false);
-  const [f, setF] = useState({
-    eventId: eventId || "",
-    name: "",
-    scholarId: "",
-    phone: "",
-    experience: "",
-    details: "",
-    department: "",
-  });
-  const [st, setSt] = useState("idle");
-  const [err, setErr] = useState("");
+  const { user, loading: authLoading, signIn } = useAuth();
+  const [mode, setMode] = useState("signup");
+  const [form, setForm] = useState(initialForm);
+  const [event, setEvent] = useState(null);
+  const [eventError, setEventError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const attemptedEventRef = useRef("");
+
   useEffect(() => {
-    let live = true;
+    if (!eventId) return undefined;
+
+    let active = true;
     api
       .events()
-      .then((d) => {
-        if (!live) return;
-        setEvents(d.events);
-        setF((p) =>
-          p.eventId && d.events.some((e) => e.id === p.eventId)
-            ? p
-            : { ...p, eventId: (d.events.find((e) => e.open) || {}).id || "" },
-        );
+      .then(({ events }) => {
+        if (active) {
+          setEvent(events.find((item) => item._id === eventId) || null);
+        }
       })
-      .catch(() => {
-        if (live) setLoadErr(true);
+      .catch((requestError) => {
+        if (active) setEventError(requestError.message);
       });
+
     return () => {
-      live = false;
+      active = false;
     };
-  }, []);
-  const ev = events && events.find((e) => e.id === f.eventId);
-  const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
-  const submit = async (e) => {
-    e.preventDefault();
-    setSt("sending");
-    setErr("");
-    const { eventId: id, ...rest } = f;
+  }, [eventId]);
+
+  useEffect(() => {
+    if (
+      authLoading ||
+      !user ||
+      !eventId ||
+      attemptedEventRef.current === eventId
+    ) {
+      return;
+    }
+
+    attemptedEventRef.current = eventId;
+    setBusy(true);
+    setError("");
+
+    api
+      .registerForEvent(eventId)
+      .then(() =>
+        setMessage(`You’re registered for ${event?.title || "the event"}.`),
+      )
+      .catch((requestError) => setError(requestError.message))
+      .finally(() => setBusy(false));
+  }, [authLoading, eventId, event?.title, user]);
+
+  const updateField = (field) => (changeEvent) => {
+    setForm((current) => ({ ...current, [field]: changeEvent.target.value }));
+  };
+
+  const submit = async (submitEvent) => {
+    submitEvent.preventDefault();
+    setBusy(true);
+    setError("");
+    setMessage("");
+
     try {
-      await api.register(id, {
-        ...rest,
-        details: f.experience === "No experience" ? "" : f.details,
-      });
-      setSt("done");
-    } catch (x) {
-      setErr(x.message);
-      setSt("error");
+      const result =
+        mode === "signup"
+          ? await api.signup(form)
+          : await api.login({
+              email: form.email,
+              password: form.password,
+            });
+
+      signIn(result.user);
+
+      if (eventId) {
+        attemptedEventRef.current = eventId;
+        await api.registerForEvent(eventId);
+        setMessage(`You’re registered for ${event?.title || "the event"}.`);
+      } else {
+        setMessage(
+          mode === "signup"
+            ? "Your account has been created."
+            : "You’re signed in.",
+        );
+      }
+    } catch (requestError) {
+      setError(requestError.errors[0].message);
+    } finally {
+      setBusy(false);
     }
   };
+
+  const selectMode = (nextMode) => {
+    setMode(nextMode);
+    setError("");
+    setMessage("");
+  };
+
   const info = (
     <div className="reg-info">
       <div className="section-label">
-        <span>→</span> / REGISTRATION
+        <span>→</span> / {eventId ? "EVENT REGISTRATION" : "YOUR ACCOUNT"}
       </div>
       <h2>
-        Reserve
-        <br />
-        <span>your seat.</span>
+        {eventId ? (
+          <>
+            Reserve
+            <br />
+            <span>your seat.</span>
+          </>
+        ) : (
+          <>
+            Join the
+            <br />
+            <span>summit.</span>
+          </>
+        )}
       </h2>
-      {ev ? (
+      {event ? (
         <>
-          <p>{ev.description || ev.title}</p>
+          <p>{event.description || event.title}</p>
           <ul>
-            <li>{fmtRange(ev.startDate, ev.endDate)}</li>
-            {ev.venue && <li>{ev.venue}</li>}
-            <li>
-              {ev.spotsLeft == null
-                ? "Open to all students"
-                : ev.spotsLeft + " seats left"}
-            </li>
+            <li>{event.title}</li>
+            {event.date && <li>{event.date}</li>}
+            {event.time && <li>{event.time}</li>}
+            {event.venue && <li>{event.venue}</li>}
           </ul>
         </>
       ) : (
         <p>
-          Register to take part in Dev Summit 2026. Open to students who want to
-          learn, build and connect.
+          Create an account to register for Dev Summit events. New accounts
+          start with the standard user role.
         </p>
       )}
+      {eventError && <p className="reg-err">{eventError}</p>}
     </div>
   );
-  if (loadErr || (events && events.length === 0))
+
+  if (authLoading || (eventId && user && busy)) {
     return (
       <section className="register section-pad full">
         {info}
         <div className="reg-card reg-done">
-          <h3>{loadErr ? "Can’t load events" : "No events yet"}</h3>
           <p>
-            {loadErr
-              ? "We couldn’t reach the server. Please refresh the page or try again in a moment."
-              : "Registration will open soon. Check back shortly."}
+            {eventId ? "Registering your account…" : "Checking your account…"}
           </p>
         </div>
       </section>
     );
-  if (!events)
+  }
+
+  if (message) {
     return (
       <section className="register section-pad full">
         {info}
         <div className="reg-card reg-done">
-          <p>Loading…</p>
-        </div>
-      </section>
-    );
-  return (
-    <section className="register section-pad full">
-      {info}
-      {st === "done" ? (
-        <div className="reg-card reg-done">
-          <h3>You’re registered.</h3>
-          <p>
-            Thanks, {f.name.split(" ")[0] || "there"}! Your registration for{" "}
-            {ev ? ev.title : "the event"} is confirmed for Scholar ID{" "}
-            <strong>{f.scholarId}</strong>. See you on{" "}
-            {ev ? fmtLong(ev.startDate) : "the day"}.
-          </p>
-          <a className="reg-btn" href="#/timeline">
-            View the schedule
+          <h3>{eventId ? "You’re in." : "Welcome."}</h3>
+          <p>{message}</p>
+          <a className="reg-btn" href="#/events">
+            Explore events
           </a>
         </div>
-      ) : (
-        <form className="reg-card" onSubmit={submit}>
-          <div className="reg-grid">
-            <label className="wide">
-              <span>Event</span>
-              <select required value={f.eventId} onChange={set("eventId")}>
-                {events.map((x) => (
-                  <option key={x.id} value={x.id} disabled={!x.open}>
-                    {x.title}
-                    {x.open
-                      ? ""
-                      : x.full
-                        ? " (full)"
-                        : " (registration closed)"}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              <span>Name</span>
-              <input
-                required
-                type="text"
-                autoComplete="name"
-                value={f.name}
-                onChange={set("name")}
-              />
-            </label>
-            <label>
-              <span>Scholar ID</span>
-              <input
-                required
-                type="text"
-                value={f.scholarId}
-                onChange={set("scholarId")}
-              />
-            </label>
-            <label>
-              <span>Phone number</span>
-              <input
-                required
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                pattern="[0-9+\- ]{10,15}"
-                title="Enter a valid phone number"
-                value={f.phone}
-                onChange={set("phone")}
-              />
-            </label>
-            <label>
-              <span>Experience in Web / ML</span>
-              <select
-                required
-                value={f.experience}
-                onChange={set("experience")}
-              >
-                <option value="">Select…</option>
-                {experience.map((x) => (
-                  <option key={x}>{x}</option>
-                ))}
-              </select>
-            </label>
-            {f.experience && f.experience !== "No experience" && (
-              <label className="wide">
-                <span>
-                  Tell us about your{" "}
-                  {f.experience === "Both Web and ML"
-                    ? "Web and ML"
-                    : f.experience === "Machine learning (ML)"
-                      ? "ML"
-                      : "Web"}{" "}
-                  experience
-                </span>
-                <textarea
-                  rows="4"
-                  maxLength={500}
-                  value={f.details}
-                  onChange={set("details")}
-                  placeholder="Projects, courses, tools or languages you have worked with…"
-                />
-              </label>
-            )}
-            <label className="wide">
-              <span>Department</span>
-              <input
-                required
-                type="text"
-                value={f.department}
-                onChange={set("department")}
-              />
-            </label>
-          </div>
-          {st === "error" && (
-            <p className="reg-err">
-              {err || "Something went wrong. Please try again."}
+      </section>
+    );
+  }
+
+  if (user && eventId) {
+    return (
+      <section className="register section-pad full">
+        {info}
+        <div className="reg-card reg-done">
+          <h3>Registration incomplete.</h3>
+          {error && (
+            <p className="reg-err" role="alert">
+              {error}
             </p>
           )}
           <button
             className="reg-btn"
-            type="submit"
-            disabled={st === "sending" || !ev || !ev.open}
+            type="button"
+            disabled={busy || event?.registrationStatus !== "open"}
+            onClick={async () => {
+              setBusy(true);
+              setError("");
+              try {
+                await api.registerForEvent(eventId);
+                setMessage(
+                  `You’re registered for ${event?.title || "the event"}.`,
+                );
+              } catch (requestError) {
+                setError(requestError.message);
+              } finally {
+                setBusy(false);
+              }
+            }}
           >
-            {st === "sending" ? "Submitting…" : "Register for this event"}
+            {busy ? "Registering…" : "Try registration again"}
           </button>
-        </form>
-      )}
+        </div>
+      </section>
+    );
+  }
+
+  if (user) {
+    return (
+      <section className="register section-pad full">
+        {info}
+        <div className="reg-card reg-done">
+          <h3>You’re signed in.</h3>
+          <p>
+            Signed in as <strong>{user.email}</strong>. You can now register for
+            events with one click.
+          </p>
+          <a className="reg-btn" href="#/events">
+            Explore events
+          </a>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="register section-pad full">
+      {info}
+      <form className="reg-card" onSubmit={submit}>
+        <div className="reg-grid">
+          {mode === "signup" && (
+            <>
+              <label className="wide">
+                <span>Name</span>
+                <input
+                  required
+                  type="text"
+                  autoComplete="name"
+                  minLength={2}
+                  maxLength={100}
+                  value={form.name}
+                  onChange={updateField("name")}
+                />
+              </label>
+              <label className="wide">
+                <span>Scholar ID</span>
+                <input
+                  required
+                  type="text"
+                  autoComplete="off"
+                  value={form.scholarId}
+                  onChange={updateField("scholarId")}
+                />
+              </label>
+            </>
+          )}
+          <label className="wide">
+            <span>College email</span>
+            <input
+              required
+              type="email"
+              autoComplete="email"
+              pattern="[A-Za-z0-9._%+-]+@cse\.nits\.ac\.in"
+              title="Use your @cse.nits.ac.in email address"
+              value={form.email}
+              onChange={updateField("email")}
+            />
+          </label>
+          <label className="wide">
+            <span>Password</span>
+            <input
+              required
+              type="password"
+              autoComplete={
+                mode === "signup" ? "new-password" : "current-password"
+              }
+              minLength={6}
+              value={form.password}
+              onChange={updateField("password")}
+            />
+          </label>
+        </div>
+        {error && (
+          <p className="reg-err" role="alert">
+            {error}
+          </p>
+        )}
+        <button className="reg-btn" type="submit" disabled={busy}>
+          {busy
+            ? mode === "signup"
+              ? "Creating account…"
+              : "Signing in…"
+            : mode === "signup"
+              ? eventId
+                ? "Create account & register"
+                : "Create account"
+              : eventId
+                ? "Sign in & register"
+                : "Sign in"}
+        </button>
+        <p className="reg-switch">
+          {mode === "signup"
+            ? "Already have an account?"
+            : "New to Dev Summit?"}{" "}
+          <button
+            type="button"
+            onClick={() => selectMode(mode === "signup" ? "login" : "signup")}
+          >
+            {mode === "signup" ? "Sign in" : "Create an account"}
+          </button>
+        </p>
+      </form>
     </section>
   );
 }
