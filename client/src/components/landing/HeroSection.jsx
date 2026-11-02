@@ -1,4 +1,4 @@
-import { LOGO_DIRECTORY } from "./landingData.js";
+import { LOGO_DIRECTORY, WHATSAPP_COMMUNITY_URL } from "./landingData.js";
 
 export default function HeroSection() {
   return (
@@ -45,8 +45,17 @@ export default function HeroSection() {
           </div>
         </div>
         <div className="hero-cta">
-          <a className="reg-btn" href="#/register">
+          {/* Registration temporarily paused - WhatsApp community link active */}
+          {/* <a className="reg-btn" href="#/register">
             Register now ↗
+          </a> */}
+          <a
+            className="reg-btn"
+            href={WHATSAPP_COMMUNITY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            JOIN NOW ↗
           </a>
           <a className="reg-btn ghost" href="#/timeline">
             View timeline

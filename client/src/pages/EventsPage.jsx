@@ -112,7 +112,7 @@ export default function EventsPage() {
         <h2>
           Upcoming <span>events.</span>
         </h2>
-        <p>Pick an event, register in under a minute and get ready to build.</p>
+        <p>Explore upcoming sessions and join the Dev Summit WhatsApp community to participate.</p>
       </div>
 
       {isAdmin && (

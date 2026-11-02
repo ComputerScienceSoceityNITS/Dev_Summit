@@ -57,4 +57,7 @@ export const outcomes = [
   "Connect with peers, mentors and the tech community",
 ];
 
+export const WHATSAPP_COMMUNITY_URL =
+  "https://chat.whatsapp.com/J2W8tc7sAgEHDDq1PA1iNe?s=cl&p=a&iam=2";
+
 export const LOGO_DIRECTORY = "/assets/logos/";

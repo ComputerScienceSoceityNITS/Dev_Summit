@@ -1,4 +1,5 @@
 import { NAV_ITEMS } from "../../utils/navigation.js";
+import { WHATSAPP_COMMUNITY_URL } from "../landing/landingData.js";
 
 export default function SiteHeader({
   active,
@@ -40,7 +41,8 @@ export default function SiteHeader({
             {title}
           </a>
         ))}
-        {!user ? (
+        {/* Registration button commented out - replaced with Join Now */}
+        {/* {!user ? (
           <a className="nav-cta" href="#/register" onClick={onNavigate}>
             Register ↗
           </a>
@@ -60,7 +62,16 @@ export default function SiteHeader({
               Sign out
             </button>
           </>
-        )}
+        )} */}
+        <a
+          className="nav-cta"
+          href={WHATSAPP_COMMUNITY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onNavigate}
+        >
+          JOIN NOW ↗
+        </a>
       </nav>
     </header>
   );

@@ -1,3 +1,5 @@
+import { WHATSAPP_COMMUNITY_URL } from "../landing/landingData.js";
+
 function formatEventDate(value) {
   if (!value) return "";
 
@@ -45,7 +47,8 @@ export default function EventCard({
           {statusLabel}
         </span>
       </div>
-      {isOpen && user ? (
+      {/* Event direct registration commented out - Join Community active */}
+      {/* {isOpen && user ? (
         <button
           className="reg-btn"
           type="button"
@@ -66,7 +69,15 @@ export default function EventCard({
         <button className="reg-btn" type="button" disabled>
           Register ↗
         </button>
-      )}
+      )} */}
+      <a
+        className="reg-btn"
+        href={WHATSAPP_COMMUNITY_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        JOIN NOW ↗
+      </a>
       {managing && (
         <div className="ev-admin-actions">
           <button
