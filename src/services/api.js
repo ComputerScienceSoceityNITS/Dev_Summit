@@ -11,14 +11,38 @@ const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(
   "",
 );
 
+let storedToken = localStorage.getItem("dev_summit_jwt") || "";
+
+export function setAuthToken(token) {
+  if (token) {
+    storedToken = token;
+    localStorage.setItem("dev_summit_jwt", token);
+  } else {
+    storedToken = "";
+    localStorage.removeItem("dev_summit_jwt");
+  }
+}
+
+export function getStoredAuthToken() {
+  return storedToken;
+}
+
 async function request(path, { method = "GET", body, responseType } = {}) {
   let response;
+
+  const headers = {};
+  if (body) {
+    headers["Content-Type"] = "application/json";
+  }
+  if (storedToken) {
+    headers["Authorization"] = `Bearer ${storedToken}`;
+  }
 
   try {
     response = await fetch(`${API_BASE_URL}/api${path}`, {
       method,
       credentials: "include",
-      headers: body ? { "Content-Type": "application/json" } : undefined,
+      headers: Object.keys(headers).length > 0 ? headers : undefined,
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch {

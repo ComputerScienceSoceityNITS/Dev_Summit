@@ -6,7 +6,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { api } from "../services/api.js";
+import { api, setAuthToken } from "../services/api.js";
 
 const AuthContext = createContext(null);
 
@@ -63,10 +63,12 @@ export function AuthProvider({ children }) {
   const signOut = useCallback(async () => {
     try {
       await api.logout();
+      setAuthToken("");
       setUser(null);
       setError("");
     } catch (requestError) {
       if (requestError.status === 401) {
+        setAuthToken("");
         setUser(null);
         setError("");
         return;

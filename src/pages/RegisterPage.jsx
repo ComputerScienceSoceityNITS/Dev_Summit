@@ -53,7 +53,9 @@ export default function RegisterPage({ eventId }) {
       return;
     }
     setStepError("");
-    registerForSelectedEvent(effectiveScholarId);
+    registerForSelectedEvent(effectiveScholarId).catch((err) => {
+      setStepError(err.message);
+    });
   };
 
   return (

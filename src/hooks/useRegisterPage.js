@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { api } from "../services/api.js";
+import { api, setAuthToken } from "../services/api.js";
 
 export default function useRegisterPage(eventId) {
   const { user, loading: authLoading, signIn, refreshUser } = useAuth();
@@ -43,6 +43,9 @@ export default function useRegisterPage(eventId) {
         setMessage(requestError.message);
         return;
       }
+      if (requestError.status === 401 && refreshUser) {
+        await refreshUser().catch(() => {});
+      }
       throw requestError;
     }
   }, [event?.title, eventId, refreshUser]);
@@ -80,6 +83,9 @@ export default function useRegisterPage(eventId) {
 
       try {
         const result = await api.googleSignIn(credential);
+        if (result?.token) {
+          setAuthToken(result.token);
+        }
         let currentUser = result.user;
 
         // If a scholar ID was provided and the user account doesn't have one, update it
