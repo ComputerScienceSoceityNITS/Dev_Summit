@@ -6,10 +6,10 @@ import TimelineSection from "./TimelineSection.jsx";
 import WingsSection from "./WingsSection.jsx";
 import WorkshopsSection from "./WorkshopsSection.jsx";
 
-export default function LandingPage({ listRef }) {
+export default function LandingPage({ listRef, user }) {
   return (
     <>
-      <HeroSection />
+      <HeroSection user={user} />
       <OverviewSection />
       <TimelineSection listRef={listRef} />
       <WingsSection />

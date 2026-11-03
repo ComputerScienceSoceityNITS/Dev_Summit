@@ -5,7 +5,10 @@ React + Vite single-page website (red / blue / white system) for Dev Summit 2026
 ## Run locally
 1. Install Node.js (LTS)
 2. `npm install`
-3. `npm run dev` (development) or `npm run build && npm run preview` (production check)
+3. Copy `.env.example` to `.env` and set `VITE_GOOGLE_CLIENT_ID` to your Google OAuth Web client ID. Vercel routes `/api` to the deployed API using `vercel.json`; on other hosts, set `VITE_API_BASE_URL` to the backend origin.
+4. `npm run dev` (development) or `npm run build && npm run preview` (production check)
+
+Google sign-in also requires the same `GOOGLE_CLIENT_ID` in the backend environment. Configure the OAuth Web client with the frontend origin under authorized JavaScript origins. Sign-in is restricted to verified NIT Silchar Google accounts.
 
 ## What's included
 - Animated terminal-style loading screen (progress, boot messages, skip button, reduced-motion aware): `src/Loader.jsx`
@@ -23,14 +26,4 @@ Organisers get a protected dashboard at `#/admin` (linked as "ADMIN" in the foot
 - **Delete event** — inside the Edit window; asks for confirmation and also removes that event's registrations
 - **Registrations** — per-event count, seats left, experience breakdown, search/filter, each person's full response, and **Export CSV**
 
-### Running it
-1. Copy `.env.example` to `.env` and set `ADMIN_USERNAME` and `ADMIN_PASSWORD` (works the same on Windows, Mac and Linux).
-2. `npm install`
-3. Terminal 1: `npm run server`   Terminal 2: `npm run dev`
-
-Production (one process): set `NODE_ENV=production` plus both credentials, then `npm start` (serves the site and API on port 8787; change with `PORT`).
-
-Notes
-- Without a `.env`, development falls back to username `admin` / password `devsummit-admin`. In production the server refuses to start unless both are set.
-- Data lives in `server/data/db.json` (override with `DATA_DIR`). Back it up — deleting an event is permanent.
-- Needs a host that can run Node; static-only hosting cannot run the backend.
+The frontend is a static Vite application and the API is deployed separately. On Vercel, configure the frontend project to build with `npm run build` and publish `dist`; configure the backend project with its own environment variables. Do not use the frontend `start` script as an API server.
