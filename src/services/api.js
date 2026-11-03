@@ -74,11 +74,12 @@ export const api = {
       body: { credential },
     }),
   me: () => request("/auth/me"),
+  updateProfile: (body) => request("/auth/me", { method: "PATCH", body }),
   logout: () => request("/auth/logout", { method: "POST" }),
-  registerForEvent: (eventId) =>
+  registerForEvent: (eventId, scholarId) =>
     request("/registrations/register", {
       method: "POST",
-      body: { eventId },
+      body: { eventId, scholarId },
     }),
   myRegistrations: () => request("/registrations/mine"),
   createEvent: (body) => request("/events", { method: "POST", body }),

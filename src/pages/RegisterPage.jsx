@@ -7,6 +7,7 @@ import { WHATSAPP_COMMUNITY_URL } from "../components/landing/landingData.js";
 
 export default function RegisterPage({ eventId }) {
   const [hasJoinedCommunity, setHasJoinedCommunity] = useState(false);
+  const [scholarId, setScholarId] = useState("");
   const [stepError, setStepError] = useState("");
 
   const {
@@ -17,8 +18,9 @@ export default function RegisterPage({ eventId }) {
     eventError,
     handleGoogleCredential,
     message,
-    user,
+    registerForSelectedEvent,
     retryRegistration,
+    user,
   } = useRegisterPage(eventId);
 
   const isRegisteringForEvent = Boolean(eventId);
@@ -35,8 +37,23 @@ export default function RegisterPage({ eventId }) {
       );
       return;
     }
+    if (!scholarId.trim()) {
+      setStepError("Please enter your Scholar ID to proceed.");
+      return;
+    }
     setStepError("");
-    handleGoogleCredential(credential);
+    handleGoogleCredential(credential, scholarId.trim());
+  };
+
+  const handleLoggedInRegister = (e) => {
+    e.preventDefault();
+    const effectiveScholarId = scholarId.trim() || user?.scholarId;
+    if (!effectiveScholarId) {
+      setStepError("Please enter your Scholar ID to complete registration.");
+      return;
+    }
+    setStepError("");
+    registerForSelectedEvent(effectiveScholarId);
   };
 
   return (
@@ -65,13 +82,56 @@ export default function RegisterPage({ eventId }) {
           secondaryActionLabel={isRegisteringForEvent ? "Community group ↗" : undefined}
           secondaryActionExternal={true}
         />
+      ) : user && isRegisteringForEvent && !user.scholarId ? (
+        <div className="reg-card google-signin-card">
+          <div className="google-signin-heading">
+            <span className="section-label">ONE LAST STEP</span>
+            <h3>Enter Your Scholar ID</h3>
+            <p>
+              Signed in as <strong>{user.email}</strong>. Please provide your Scholar ID to complete registration for {event?.title || "this event"}.
+            </p>
+          </div>
+          <form onSubmit={handleLoggedInRegister} style={{ marginTop: "20px" }}>
+            <div className="reg-scholar-box">
+              <label htmlFor="scholarId-input-logged" className="reg-scholar-label">
+                Scholar ID <span>*</span>
+              </label>
+              <input
+                id="scholarId-input-logged"
+                type="text"
+                className="reg-scholar-input"
+                placeholder="e.g. 2312001"
+                value={scholarId}
+                onChange={(e) => {
+                  setScholarId(e.target.value);
+                  if (e.target.value.trim()) setStepError("");
+                }}
+                disabled={busy}
+                autoFocus
+              />
+            </div>
+            {(stepError || error) && (
+              <p className="reg-err" role="alert">
+                {stepError || error}
+              </p>
+            )}
+            <button
+              className="reg-btn"
+              type="submit"
+              disabled={busy || !scholarId.trim() || event?.registrationStatus !== "open"}
+              style={{ marginTop: "20px" }}
+            >
+              {busy ? "Registering…" : "Confirm Event Registration ↗"}
+            </button>
+          </form>
+        </div>
       ) : user && isRegisteringForEvent ? (
         <RegisterStatus
           title="Registration incomplete."
           error={error}
           actionLabel={busy ? "Registering…" : "Try registration again"}
           actionDisabled={busy || event?.registrationStatus !== "open"}
-          onAction={retryRegistration}
+          onAction={() => retryRegistration(user.scholarId)}
           secondaryActionHref={WHATSAPP_COMMUNITY_URL}
           secondaryActionLabel="Join community ↗"
           secondaryActionExternal={true}
@@ -125,22 +185,38 @@ export default function RegisterPage({ eventId }) {
             </div>
           )}
 
-          <div style={{ marginTop: isRegisteringForEvent ? "24px" : "0" }}>
-            {isRegisteringForEvent && (
-              <div
-                style={{
-                  fontSize: "12px",
-                  fontFamily: "'DM Mono', monospace",
-                  letterSpacing: "1px",
-                  fontWeight: 700,
-                  color: "#687386",
-                  marginBottom: "8px",
-                  textTransform: "uppercase",
-                }}
-              >
-                Step 2 - Verify Account & Register
-              </div>
-            )}
+          <div className="reg-scholar-box">
+            <label htmlFor="scholarId-input" className="reg-scholar-label">
+              {isRegisteringForEvent ? "Step 2 - Scholar ID" : "Scholar ID"} <span>*</span>
+            </label>
+            <input
+              id="scholarId-input"
+              type="text"
+              className="reg-scholar-input"
+              placeholder="e.g. 2312001"
+              value={scholarId}
+              onChange={(e) => {
+                setScholarId(e.target.value);
+                if (e.target.value.trim()) setStepError("");
+              }}
+              disabled={busy}
+            />
+          </div>
+
+          <div style={{ marginTop: "24px" }}>
+            <div
+              style={{
+                fontSize: "12px",
+                fontFamily: "'DM Mono', monospace",
+                letterSpacing: "1px",
+                fontWeight: 700,
+                color: "#687386",
+                marginBottom: "8px",
+                textTransform: "uppercase",
+              }}
+            >
+              {isRegisteringForEvent ? "Step 3 - Verify Account & Register" : "Sign In With Institute Account"}
+            </div>
             <GoogleSignInButton
               disabled={busy}
               onCredential={handleCredentialAttempt}
