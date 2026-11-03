@@ -139,6 +139,17 @@ html{scroll-padding-top:0}
 .reg-grid input,.reg-grid select{height:50px;padding:0 14px;border:1px solid #c9d0db;background:#fff;font:16px Inter,sans-serif;color:#111827;border-radius:0}.reg-grid input:focus,.reg-grid select:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(214,40,57,.15)}
 .reg-card .reg-btn{width:100%;margin-top:28px}.reg-err{color:#b91c1c;margin:18px 0 0;font-size:15px}
 .reg-done{text-align:center;padding:60px 38px}.reg-done h3{font:800 54px/1 'Barlow Condensed';text-transform:uppercase;color:var(--red);margin:0 0 16px}.reg-done p{font-size:18px;line-height:1.7;color:#4b5565;margin:0 0 30px}.reg-done .reg-btn{width:auto}
+.reg-actions-row{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:20px}
+.reg-mandatory-box{margin-top:24px;padding:18px 20px;background:#f3f5f8;border:1px solid #d4d9e2;text-align:left}
+.reg-mandatory-title{font-size:12px;font-family:'DM Mono',monospace;letter-spacing:1px;font-weight:700;color:#851824;margin-bottom:6px;text-transform:uppercase}
+.reg-mandatory-desc{font-size:14px;color:#4b5565;line-height:1.6;margin:0 0 14px}
+.reg-join-btn{width:100%;margin-top:0 !important;background:#25d366;border-color:#25d366;color:#fff}
+.reg-join-btn:hover{background:#1ebe5d;border-color:#1ebe5d}
+.reg-join-btn.joined{background:#0f5132;border-color:#0f5132}
+.reg-mandatory-check{margin-top:14px;display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:#374151;cursor:pointer;user-select:none;line-height:1.4}
+.reg-mandatory-check input{margin-top:2px;cursor:pointer;accent-color:var(--red);width:16px;height:16px}
+.reg-btn.ghost-dark{background:transparent;border:1px solid #c4cbd7;color:#111827}
+.reg-btn.ghost-dark:hover{background:#111827;color:#fff;border-color:#111827}
 
 @media(max-width:900px){.register{grid-template-columns:1fr}}
 @media(max-width:760px){
